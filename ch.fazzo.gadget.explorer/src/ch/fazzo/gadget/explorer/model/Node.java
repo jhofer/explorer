@@ -12,13 +12,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Node implements Comparable<Node> {
+public class Node implements Model<Node> {
 
 	private Node parent;
 	private File file;
 	private int level = 0;
 	private int index = 0;
 	private final DriveContext dc;
+	private Set<Node> childs = new HashSet<Node>();
 
 	public Node(Node parent, DriveContext context, File f, int level, int index) {
 		this.dc = context;
@@ -29,17 +30,60 @@ public class Node implements Comparable<Node> {
 		}
 		this.level = level;
 		this.index = index;
-
+		context.add(this);
 	}
 
 	public Node(File f, DriveContext context) {
 		this.file = f;
 		this.dc = context;
 		setActive();
+		context.add(this);
 
 	}
 
-	public Set<Node> getChilds() {
+	public void closeFolder() {
+		if (this.dc.getActiveNode().getParent() != null) {
+			this.dc.removeAll(this.dc.getActiveNode().getParent().loadChilds());
+			this.dc.getActiveNode().getParent().setActive();
+		}
+
+	}
+
+	public Set<Node> openFolder() {
+		Set<Node> childs = loadChilds();
+		for (Node node : childs) {
+			if (node.getIndex() == 0) {
+				node.setActive();
+			}
+		}
+		return childs;
+	}
+
+	public void selectPreviusNode() {
+		Set<Node> nodeList;
+		nodeList = getParent().loadChilds();
+		for (Node node : nodeList) {
+			if (node.getIndex() == getIndex() - 1) {
+				node.setActive();
+				break;
+			}
+		}
+	}
+
+	public void selectNextNode() {
+
+		Set<Node> nodeList;
+		nodeList = getParent().loadChilds();
+		for (Node node : nodeList) {
+			if (node.getIndex() == this.dc.getActiveNode().getIndex() + 1) {
+				node.setActive();
+				break;
+			}
+		}
+
+	}
+
+	private Set<Node> loadChilds() {
 		if (this.file.isDirectory() && this.file.listFiles() != null
 				&& this.file.listFiles().length > 0) {
 			List<File> list = Arrays.asList(this.file.listFiles());
@@ -62,10 +106,15 @@ public class Node implements Comparable<Node> {
 
 				}
 			}
+			this.childs = childs;
 			return childs;
 		} else {
 			return Collections.emptySet();
 		}
+	}
+
+	public Set<Node> getChilds() {
+		return this.childs;
 	}
 
 	public Node getParent() {
@@ -83,7 +132,7 @@ public class Node implements Comparable<Node> {
 	}
 
 	public boolean isDir() {
-		return this.file.isDirectory();
+		return this.file.isDirectory() && !isRoot();
 	}
 
 	public void run() {
@@ -153,22 +202,32 @@ public class Node implements Comparable<Node> {
 		}
 	}
 
-	public void insertIntoParent(Node insert) {
+	public void insertIntoParent() {
+		if (this.dc.modificationContains(Modification.COPY, Modification.CUT)) {
 
-		try {
-			Files.copy(insert.file.toPath(),
-					getParent().file.toPath().resolve(insert.file.getName()));
-		} catch (FileAlreadyExistsException e) {
 			try {
-				Files.copy(insert.file.toPath(), getParent().file.toPath()
-						.resolve(insert.file.getName() + " copy"));
-			} catch (IOException e1) {
+				Files.copy(
+						this.dc.getModifyNode().file.toPath(),
+						getParent().file.toPath().resolve(
+								this.dc.getModifyNode().file.getName()));
+			} catch (FileAlreadyExistsException e) {
+				try {
+					Files.copy(
+							this.dc.getModifyNode().file.toPath(),
+							getParent().file.toPath().resolve(
+									this.dc.getModifyNode().file.getName()
+											+ " copy"));
+
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			this.dc.clearModify(Modification.COPY);
+			this.dc.clearModify(Modification.CUT);
 		}
 
 	}
@@ -203,7 +262,29 @@ public class Node implements Comparable<Node> {
 	}
 
 	public boolean isFiltered() {
-		return this.dc.isFiltered(this.toString());
+		return this.dc.isFiltered(toString());
 	}
 
+	public boolean isInActiveHierarchy() {
+		Node parent = this.dc.getActiveNode();
+
+		boolean result = false;
+		while (parent != null) {
+			if (equals(parent)) {
+				result = true;
+				break;
+			}
+			parent = parent.getParent();
+		}
+		return result;
+	}
+
+	@Override
+	public String id() {
+		return this.file.getAbsolutePath();
+	}
+
+	public void clearModify(Modification... mods) {
+		this.dc.clearModify(mods);
+	}
 }

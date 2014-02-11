@@ -2,10 +2,13 @@ package ch.fazzo.gadget.explorer.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Set;
 
-public class DriveContext {
+public class DriveContext extends Observable implements Model<DriveContext> {
 
 	private Node activeNode;
 	private Node modifyNode;
@@ -20,11 +23,41 @@ public class DriveContext {
 
 	private final Map<Integer, List<Integer>> levelToIndex = new HashMap<Integer, List<Integer>>();
 	private final List<Integer> visiblLevel = new ArrayList<Integer>();
-	private String filterText;
+	private String filterText = "";
+
+	private int delCounter = 0;
+
+	private final Set<Node> allNodes = new HashSet<Node>();
+	private boolean filter;
+
+	private void resetDel() {
+		this.delCounter = 0;
+		clearModify(Modification.DEL);
+	}
 
 	public void setActive(Node node) {
 		this.activeNode = node;
+		resetDel();
 		calcVisibility();
+
+	}
+
+	public void add(Node node) {
+
+		this.allNodes.add(node);
+		setChanged();
+		notifyObservers(this);
+	}
+
+	public void removeAll(Set<Node> nodes) {
+
+		this.allNodes.removeAll(nodes);
+		setChanged();
+		notifyObservers(this);
+	}
+
+	public Set<Node> getAllNodes() {
+		return this.allNodes;
 
 	}
 
@@ -35,6 +68,35 @@ public class DriveContext {
 	public void modify(Node node, Modification mod) {
 		this.modifyNode = node;
 		this.modification = mod;
+		if (!Modification.DEL.equals(mod)) {
+			resetDel();
+		} else {
+			if (this.delCounter++ == 1) {
+				// this.pane.removeNodes(this.dc.getActiveNode().getParent()
+				// .loadChilds());
+
+				getActiveNode().delete();
+				selectNextNode();
+				// this.pane.addNodes(this.dc.getActiveNode().getParent()
+				// .loadChilds());
+				resetDel();
+
+			}
+		}
+	}
+
+	private void selectNextNode() {
+
+		Node currentActive = getActiveNode();
+		Set<Node> nodeList;
+		nodeList = getActiveNode().getParent().openFolder();
+		for (Node node : nodeList) {
+			if (node.getIndex() == currentActive.getIndex() + 1) {
+
+				node.setActive();
+				break;
+			}
+		}
 
 	}
 
@@ -128,14 +190,7 @@ public class DriveContext {
 	}
 
 	public void addStringToFilter(String keyText) {
-		if (keyText == null) {
-			this.filterText = null;
-		}
-		if (this.filterText != null) {
-			this.filterText = this.filterText + keyText;
-		} else {
-			this.filterText = keyText;
-		}
+		this.filterText = this.filterText + keyText;
 	}
 
 	public boolean isFilterActive() {
@@ -143,7 +198,10 @@ public class DriveContext {
 	}
 
 	public boolean isFiltered(String string) {
-		return !this.filterText.contains(string);
+		if (!this.filter) {
+			return false;
+		}
+		return !this.filterText.toLowerCase().contains(string.toLowerCase());
 	}
 
 	public String getFilterText() {
@@ -152,7 +210,25 @@ public class DriveContext {
 
 	public void removeOneLetterFromString() {
 		this.filterText = this.filterText.substring(0,
-				this.filterText.length() - 2);
+				this.filterText.length() - 1);
+		this.filter = this.filterText.length() > 0;
+	}
+
+	@Override
+	public int compareTo(DriveContext o) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public String id() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void switchOnOffFilter() {
+		this.filter = !this.filter;
+
 	}
 
 }
