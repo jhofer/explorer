@@ -6,9 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
-public class DriveContext extends Observable implements Model<DriveContext> {
+public class DriveContext extends Observable implements Model<DriveContext>,
+		Observer {
 
 	private Node activeNode;
 	private Node modifyNode;
@@ -45,6 +47,7 @@ public class DriveContext extends Observable implements Model<DriveContext> {
 	public void add(Node node) {
 
 		this.allNodes.add(node);
+
 		setChanged();
 		notifyObservers(this);
 	}
@@ -209,8 +212,11 @@ public class DriveContext extends Observable implements Model<DriveContext> {
 	}
 
 	public void removeOneLetterFromString() {
-		this.filterText = this.filterText.substring(0,
-				this.filterText.length() - 1);
+		if (this.filterText.length() > 0) {
+			this.filterText = this.filterText.substring(0,
+					this.filterText.length() - 1);
+		}
+
 		this.filter = this.filterText.length() > 0;
 	}
 
@@ -228,6 +234,12 @@ public class DriveContext extends Observable implements Model<DriveContext> {
 
 	public void switchOnOffFilter() {
 		this.filter = !this.filter;
+
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		// TODO Auto-generated method stub
 
 	}
 

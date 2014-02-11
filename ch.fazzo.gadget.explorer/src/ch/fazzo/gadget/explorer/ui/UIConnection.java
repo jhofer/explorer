@@ -1,4 +1,4 @@
-package ch.fazzo.gadget.explorer.paint;
+package ch.fazzo.gadget.explorer.ui;
 
 import java.awt.Graphics2D;
 
@@ -18,6 +18,8 @@ public class UIConnection extends UIElement<Node> {
 		int heightNode = getStyle().getHeightNode();
 		int x = getX(widghtNode, margin, model());
 		int y = getY(heightNode, margin, model());
+
+		g2d.setColor(getStyle().getActiveColor());
 
 		int xParent = getX(widghtNode, margin, model().getParent())
 				+ widghtNode;

@@ -1,4 +1,4 @@
-package ch.fazzo.gadget.explorer.paint;
+package ch.fazzo.gadget.explorer.ui;
 
 import ch.fazzo.gadget.explorer.configuration.Style;
 import ch.fazzo.gadget.explorer.model.Node;

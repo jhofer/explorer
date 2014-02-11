@@ -15,6 +15,13 @@ import javax.swing.Timer;
 import ch.fazzo.gadget.explorer.configuration.Style;
 import ch.fazzo.gadget.explorer.model.DriveContext;
 import ch.fazzo.gadget.explorer.model.Node;
+import ch.fazzo.gadget.explorer.ui.UIConnection;
+import ch.fazzo.gadget.explorer.ui.UIElement;
+import ch.fazzo.gadget.explorer.ui.UIFile;
+import ch.fazzo.gadget.explorer.ui.UIFilterText;
+import ch.fazzo.gadget.explorer.ui.UIFolder;
+import ch.fazzo.gadget.explorer.ui.UIRoot;
+import ch.fazzo.gadget.explorer.ui.actions.UIAction;
 
 public class Renderer extends JPanel implements Observer {
 
@@ -37,8 +44,12 @@ public class Renderer extends JPanel implements Observer {
 	}
 
 	public void notifyKeyEvent(KeyEvent e) {
+		Set<UIAction> actions = new HashSet<UIAction>();
 		for (UIElement<?> uie : createElements()) {
-			uie.keyPressed(e);
+			actions.addAll(uie.keyPressed(e));
+		}
+		for (UIAction uiAction : actions) {
+			uiAction.run();
 		}
 
 	}

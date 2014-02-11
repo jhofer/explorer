@@ -10,9 +10,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Observable;
 import java.util.Set;
 
-public class Node implements Model<Node> {
+public class Node extends Observable implements Model<Node> {
 
 	private Node parent;
 	private File file;
@@ -59,10 +60,9 @@ public class Node implements Model<Node> {
 		return childs;
 	}
 
-	public void selectPreviusNode() {
-		Set<Node> nodeList;
-		nodeList = getParent().loadChilds();
-		for (Node node : nodeList) {
+	public void selectPreviousNode() {
+
+		for (Node node : this.parent.childs) {
 			if (node.getIndex() == getIndex() - 1) {
 				node.setActive();
 				break;
@@ -72,10 +72,8 @@ public class Node implements Model<Node> {
 
 	public void selectNextNode() {
 
-		Set<Node> nodeList;
-		nodeList = getParent().loadChilds();
-		for (Node node : nodeList) {
-			if (node.getIndex() == this.dc.getActiveNode().getIndex() + 1) {
+		for (Node node : this.parent.childs) {
+			if (node.getIndex() == getIndex() + 1) {
 				node.setActive();
 				break;
 			}
@@ -107,6 +105,8 @@ public class Node implements Model<Node> {
 				}
 			}
 			this.childs = childs;
+			setChanged();
+			notifyObservers(this);
 			return childs;
 		} else {
 			return Collections.emptySet();

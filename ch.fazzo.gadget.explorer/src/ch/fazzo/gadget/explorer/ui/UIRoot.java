@@ -1,13 +1,20 @@
-package ch.fazzo.gadget.explorer.paint;
+package ch.fazzo.gadget.explorer.ui;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Ellipse2D;
+import java.util.Set;
 
 import ch.fazzo.gadget.explorer.configuration.Style;
-import ch.fazzo.gadget.explorer.model.Modification;
 import ch.fazzo.gadget.explorer.model.Node;
+import ch.fazzo.gadget.explorer.ui.actions.ClearModify;
+import ch.fazzo.gadget.explorer.ui.actions.CloseFolder;
+import ch.fazzo.gadget.explorer.ui.actions.CopyFile;
+import ch.fazzo.gadget.explorer.ui.actions.InsertFile;
+import ch.fazzo.gadget.explorer.ui.actions.OpenFolder;
+import ch.fazzo.gadget.explorer.ui.actions.RunFile;
+import ch.fazzo.gadget.explorer.ui.actions.UIAction;
 
 public class UIRoot extends UIElement<Node> {
 
@@ -44,39 +51,34 @@ public class UIRoot extends UIElement<Node> {
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		if (model().isActive()) {
-			if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C) {
-				model().modify(Modification.COPY);
-				return;
-			} else if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_V) {
-				model().insertIntoParent();
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_UP) {
-				// hide favs
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-				// show favs
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-				model().closeFolder();
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-				model().openFolder();
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				model().run();
-				return;
-
-			} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-				model().clearModify(Modification.DEL, Modification.CUT,
-						Modification.COPY);
-			}
-		}
+	protected boolean consumesKeyEvent() {
+		return model().isActive();
 	}
 
 	@Override
-	protected void doAnimation() {
+	protected void consumeKeyEvent(KeyEvent e, Set<UIAction> actions) {
+		if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C) {
+			actions.add(new CopyFile(model()));
+		} else if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_V) {
+			actions.add(new InsertFile(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_UP) {
+			// hide favs
+		} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+			// show favs
+		} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+			actions.add(new CloseFolder(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+			actions.add(new OpenFolder(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			actions.add(new RunFile(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			actions.add(new ClearModify(model()));
+		}
+
+	}
+
+	@Override
+	public void doAnimation() {
 		if (model().isActive()) {
 			if (this.up) {
 				this.opacity = this.opacity + this.step;

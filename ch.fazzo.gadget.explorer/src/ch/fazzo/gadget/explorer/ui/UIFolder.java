@@ -1,14 +1,25 @@
-package ch.fazzo.gadget.explorer.paint;
+package ch.fazzo.gadget.explorer.ui;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
+import java.util.Set;
 
 import ch.fazzo.gadget.explorer.configuration.Style;
-import ch.fazzo.gadget.explorer.model.Modification;
 import ch.fazzo.gadget.explorer.model.Node;
+import ch.fazzo.gadget.explorer.ui.actions.ClearModify;
+import ch.fazzo.gadget.explorer.ui.actions.CloseFolder;
+import ch.fazzo.gadget.explorer.ui.actions.CopyFile;
+import ch.fazzo.gadget.explorer.ui.actions.CutFile;
+import ch.fazzo.gadget.explorer.ui.actions.DeleteNode;
+import ch.fazzo.gadget.explorer.ui.actions.InsertFile;
+import ch.fazzo.gadget.explorer.ui.actions.OpenFolder;
+import ch.fazzo.gadget.explorer.ui.actions.RunFile;
+import ch.fazzo.gadget.explorer.ui.actions.SelectNext;
+import ch.fazzo.gadget.explorer.ui.actions.SelectPrevious;
+import ch.fazzo.gadget.explorer.ui.actions.UIAction;
 
 public class UIFolder extends UIElement<Node> {
 
@@ -97,42 +108,35 @@ public class UIFolder extends UIElement<Node> {
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		if (model().isActive()) {
-			if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C) {
-				model().modify(Modification.COPY);
-				return;
-			} else if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_X) {
-				model().modify(Modification.CUT);
-				return;
-			} else if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_V) {
-				model().insertIntoParent();
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-				model().modify(Modification.DEL);
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_UP) {
-				model().selectPreviusNode();
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-				model().selectNextNode();
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-				model().closeFolder();
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-				model().openFolder();
-				return;
-			} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				model().run();
-				return;
+	protected boolean consumesKeyEvent() {
+		return model().isActive();
+	}
 
-			} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-				model().clearModify(Modification.DEL, Modification.CUT,
-						Modification.COPY);
-			}
+	@Override
+	protected void consumeKeyEvent(KeyEvent e, Set<UIAction> actions) {
+
+		if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C) {
+			actions.add(new CopyFile(model()));
+		} else if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_X) {
+			actions.add(new CutFile(model()));
+		} else if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_V) {
+			actions.add(new InsertFile(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+			actions.add(new DeleteNode(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_UP) {
+			actions.add(new SelectPrevious(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+			actions.add(new SelectNext(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+			actions.add(new CloseFolder(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+			actions.add(new OpenFolder(model()));
+		} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			actions.add(new RunFile(model()));
+
+		} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			actions.add(new ClearModify(model()));
 		}
-
 	}
 
 	@Override

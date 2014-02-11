@@ -1,4 +1,4 @@
-package ch.fazzo.gadget.explorer.paint;
+package ch.fazzo.gadget.explorer.ui;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -7,9 +7,11 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.util.Set;
 
 import ch.fazzo.gadget.explorer.configuration.Style;
 import ch.fazzo.gadget.explorer.model.DriveContext;
+import ch.fazzo.gadget.explorer.ui.actions.UIAction;
 
 public class UIFilterText extends UIElement<DriveContext> {
 
@@ -38,7 +40,7 @@ public class UIFilterText extends UIElement<DriveContext> {
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
+	protected void consumeKeyEvent(KeyEvent e, Set<UIAction> actions) {
 		if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) {
 			model().switchOnOffFilter();
 			return;

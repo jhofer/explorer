@@ -1,13 +1,17 @@
-package ch.fazzo.gadget.explorer.paint;
+package ch.fazzo.gadget.explorer.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import ch.fazzo.gadget.explorer.configuration.Style;
 import ch.fazzo.gadget.explorer.model.Model;
+import ch.fazzo.gadget.explorer.ui.actions.UIAction;
 
 public abstract class UIElement<T extends Model<?>> {
 
@@ -45,7 +49,7 @@ public abstract class UIElement<T extends Model<?>> {
 		this.g2d = g2d;
 	}
 
-	protected void doAnimation() {
+	public void doAnimation() {
 		// Does nothing
 	}
 
@@ -61,8 +65,20 @@ public abstract class UIElement<T extends Model<?>> {
 		return this.g2d;
 	}
 
-	protected void keyPressed(KeyEvent e) {
-		// Does nothing
+	protected boolean consumesKeyEvent() {
+		return true;
+	}
+
+	public Collection<? extends UIAction> keyPressed(KeyEvent e) {
+		Set<UIAction> actions = new HashSet<UIAction>();
+		if (consumesKeyEvent()) {
+			consumeKeyEvent(e, actions);
+		}
+		return actions;
+	}
+
+	protected void consumeKeyEvent(KeyEvent e, Set<UIAction> actions) {
+
 	}
 
 }
