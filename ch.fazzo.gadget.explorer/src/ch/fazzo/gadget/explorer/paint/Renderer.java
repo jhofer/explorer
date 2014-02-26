@@ -69,7 +69,7 @@ public class Renderer extends JPanel implements Observer {
 		super.paintComponent(g);
 
 		for (UIElement<?> e : this.elements) {
-			e.doAnimation();
+
 			e.paint(g);
 		}
 	}

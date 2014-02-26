@@ -18,6 +18,12 @@ public abstract class UIElement<T extends Model<?>> {
 	private Graphics2D g2d;
 	private final Style style;
 	private final T model;
+	private int animationsspeed = 1;
+	private int animationCounter = 0;
+
+	public void setAnimationsspeed(int animationsspeed) {
+		this.animationsspeed = animationsspeed;
+	}
 
 	public UIElement(Style style, T model) {
 		this.model = model;
@@ -27,8 +33,10 @@ public abstract class UIElement<T extends Model<?>> {
 	protected abstract boolean isVisible();
 
 	public void paint(Graphics g) {
+
 		if (isVisible()) {
 			create2d(g);
+			animate();
 			paint(this.g2d);
 			dispose2d();
 		}
@@ -49,7 +57,19 @@ public abstract class UIElement<T extends Model<?>> {
 		this.g2d = g2d;
 	}
 
-	public void doAnimation() {
+	public void animate() {
+		if (this.animationCounter == Integer.MAX_VALUE) {
+			this.animationCounter = 0;
+		}
+		if (this.animationCounter % this.animationsspeed == 0) {
+			doAnimation();
+
+		}
+		this.animationCounter++;
+
+	}
+
+	protected void doAnimation() {
 		// Does nothing
 	}
 

@@ -12,12 +12,13 @@ import java.util.Set;
 public class DriveContext extends Observable implements Model<DriveContext>,
 		Observer {
 
+	private static final int MIN_LEVEL_START = 1;
 	private Node activeNode;
 	private Node modifyNode;
 	private Modification modification;
 
-	private final int levelRange = 3;
-	private int levelRangeStart = 1;
+	private final int levelRange = 6;
+	private int levelRangeStart = MIN_LEVEL_START;
 	private int levelRangeEnd = this.levelRangeStart + this.levelRange;
 	private final int indexRange = 10;
 	private int indexRangeStart = 0;
@@ -78,14 +79,23 @@ public class DriveContext extends Observable implements Model<DriveContext>,
 				// this.pane.removeNodes(this.dc.getActiveNode().getParent()
 				// .loadChilds());
 
-				getActiveNode().delete();
-				selectNextNode();
-				// this.pane.addNodes(this.dc.getActiveNode().getParent()
-				// .loadChilds());
-				resetDel();
+				node.delete();
+				if (node.getParent().getChilds().size() == 1) {
+					node.getParent().setActive();
+				} else {
+					selectNextNode();
+				}
 
+				resetDel();
+				removeNode(node);
 			}
 		}
+	}
+
+	private void removeNode(Node node) {
+		this.allNodes.remove(node);
+		setChanged();
+		notifyObservers(this);
 	}
 
 	private void selectNextNode() {
@@ -130,15 +140,21 @@ public class DriveContext extends Observable implements Model<DriveContext>,
 		}
 
 		if (level < this.levelRangeStart) {
-			this.levelRangeStart = level;
-			this.levelRangeEnd = this.levelRangeStart + this.levelRange;
+			if (this.levelRangeStart - level <= MIN_LEVEL_START) {
+				this.levelRangeStart = MIN_LEVEL_START;
+				this.levelRangeEnd = this.levelRangeStart + this.levelRange;
+			} else {
+				this.levelRangeStart = level;
+				this.levelRangeEnd = this.levelRangeStart + this.levelRange;
+			}
 		} else if (level > this.levelRangeEnd) {
 			this.levelRangeEnd = level;
 			this.levelRangeStart = this.levelRangeEnd - this.levelRange;
-		} else if (level < this.levelRangeEnd && level > this.levelRange) {
+		} else if (level < this.levelRangeEnd) {
 			this.levelRangeEnd = level;
-			if (this.levelRangeEnd - this.levelRange <= 0) {
-				this.levelRangeStart = 0;
+			if (this.levelRangeEnd - this.levelRange <= MIN_LEVEL_START) {
+				this.levelRangeStart = MIN_LEVEL_START;
+				this.levelRangeEnd = this.levelRangeStart + this.levelRange;
 			} else {
 				this.levelRangeStart = this.levelRangeEnd - this.levelRange;
 			}
@@ -197,14 +213,14 @@ public class DriveContext extends Observable implements Model<DriveContext>,
 	}
 
 	public boolean isFilterActive() {
-		return this.filterText != null;
+		return this.filter;
 	}
 
 	public boolean isFiltered(String string) {
 		if (!this.filter) {
 			return false;
 		}
-		return !this.filterText.toLowerCase().contains(string.toLowerCase());
+		return !string.toLowerCase().contains(this.filterText.toLowerCase());
 	}
 
 	public String getFilterText() {

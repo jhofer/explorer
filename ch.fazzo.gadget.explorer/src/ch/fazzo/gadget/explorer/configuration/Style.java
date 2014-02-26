@@ -14,10 +14,9 @@ public class Style {
 	private final int widghtRoot = 10;
 	private final int heightRoot = 10;
 
-	private final int startX = 190;
+	private final int startX = 400;
 	private final int startY = 50;
-	private final int xRoot = this.startX + this.widghtNode
-			- (this.widghtRoot / 2);
+	private final int xRoot = this.startX - (this.widghtRoot) - this.margin;
 
 	private final int yRoot = this.startY - (this.heightRoot / 2);
 

@@ -73,20 +73,17 @@ public class Explorer extends JDialog {
 
 			@Override
 			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				Explorer.this.pane.notifyKeyEvent(e);
 
 			}
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
-
+				Explorer.this.pane.notifyKeyEvent(e);
 			}
 		});
 

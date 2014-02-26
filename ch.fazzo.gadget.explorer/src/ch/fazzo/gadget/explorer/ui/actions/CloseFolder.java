@@ -1,5 +1,7 @@
 package ch.fazzo.gadget.explorer.ui.actions;
 
+import javax.swing.SwingUtilities;
+
 import ch.fazzo.gadget.explorer.model.Node;
 
 public class CloseFolder implements UIAction {
@@ -12,7 +14,14 @@ public class CloseFolder implements UIAction {
 
 	@Override
 	public void run() {
-		this.node.closeFolder();
+
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				CloseFolder.this.node.closeFolder();
+			}
+		});
+
 	}
 
 }

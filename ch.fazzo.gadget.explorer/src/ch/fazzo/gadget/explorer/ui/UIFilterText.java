@@ -42,6 +42,7 @@ public class UIFilterText extends UIElement<DriveContext> {
 	@Override
 	protected void consumeKeyEvent(KeyEvent e, Set<UIAction> actions) {
 		if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) {
+			System.out.println("ON / OFF");
 			model().switchOnOffFilter();
 			return;
 		} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
@@ -50,7 +51,7 @@ public class UIFilterText extends UIElement<DriveContext> {
 		}
 
 		String text = KeyEvent.getKeyText(e.getKeyCode());
-		if (text.length() == 1) {
+		if (text.length() == 1 && model().isFilterActive()) {
 			model().addStringToFilter(text);
 		}
 

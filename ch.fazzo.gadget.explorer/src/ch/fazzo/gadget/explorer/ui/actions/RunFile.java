@@ -12,7 +12,9 @@ public class RunFile implements UIAction {
 
 	@Override
 	public void run() {
-		this.node.run();
+		if (!this.node.getDC().isFilterActive()) {
+			this.node.run();
+		}
 	}
 
 }

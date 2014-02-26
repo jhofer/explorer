@@ -237,10 +237,16 @@ public class Node extends Observable implements Model<Node> {
 	}
 
 	public boolean isVisible() {
+		if (isRoot()) {
+			return true;
+		}
 		return this.dc.isVisible(this.level, this.index);
 	}
 
 	public int getRelativeLevel() {
+		if (isRoot()) {
+			return 0;
+		}
 		return this.dc.getRelativeLevel(this.level);
 
 	}
@@ -262,7 +268,8 @@ public class Node extends Observable implements Model<Node> {
 	}
 
 	public boolean isFiltered() {
-		return this.dc.isFiltered(toString());
+		boolean f = this.dc.isFiltered(toString());
+		return f;
 	}
 
 	public boolean isInActiveHierarchy() {
@@ -286,5 +293,13 @@ public class Node extends Observable implements Model<Node> {
 
 	public void clearModify(Modification... mods) {
 		this.dc.clearModify(mods);
+	}
+
+	public DriveContext getDC() {
+		return this.dc;
+	}
+
+	public boolean isNew() {
+		return System.currentTimeMillis() - this.file.lastModified() < 600000;
 	}
 }

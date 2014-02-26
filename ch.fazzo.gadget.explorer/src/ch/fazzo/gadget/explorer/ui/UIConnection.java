@@ -20,11 +20,17 @@ public class UIConnection extends UIElement<Node> {
 		int y = getY(heightNode, margin, model());
 
 		g2d.setColor(getStyle().getActiveColor());
-
-		int xParent = getX(widghtNode, margin, model().getParent())
-				+ widghtNode;
-		int yParent = getY(heightNode, margin, model().getParent())
-				+ (heightNode / 2);
+		int xParent;
+		int yParent;
+		if (model().getParent().isRoot()) {
+			xParent = getStyle().getxRoot() + margin;
+			yParent = getStyle().getyRoot() + getStyle().getHeightRoot() / 2;
+		} else {
+			xParent = getX(widghtNode, margin, model().getParent())
+					+ widghtNode;
+			yParent = getY(heightNode, margin, model().getParent())
+					+ (heightNode / 2);
+		}
 		g2d.drawLine(xParent, yParent, xParent + (margin / 2), yParent);
 		g2d.drawLine(xParent + (margin / 2), yParent, x - (margin / 2), y
 				+ (heightNode / 2));
@@ -46,7 +52,8 @@ public class UIConnection extends UIElement<Node> {
 
 	@Override
 	protected boolean isVisible() {
-		return model().isInActiveHierarchy() && model().getParent().isVisible();
+		return model().isInActiveHierarchy() && model().isVisible()
+				&& model().getParent().isVisible();
 	}
 
 }
